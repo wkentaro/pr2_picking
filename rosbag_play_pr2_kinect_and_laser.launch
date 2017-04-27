@@ -1,0 +1,89 @@
+<launch>
+
+  <param name="/robot_description" command="$(find xacro)/xacro $(find pr2_description)/robots/pr2.urdf.xacro" />
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find pr2_picking)/data/pr2_kinect_and_laser_2.bag --clock --loop" />
+
+  <node name="$(anon rviz)"
+        pkg="rviz" type="rviz"
+        args="-d $(find pr2_picking)/rvizconfig/rosbag_play_kinect_and_laser.rviz" />
+
+<!-- kinect {{ -->
+
+  <group ns="/kinect_head/rgb">
+    <node name="republish_rgb"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="/kinect_head_localhost/rgb/image_raw" />
+    </node>
+  </group>
+  <group ns="/kinect_head_localhost/rgb">
+    <node name="rectify_rgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone image_proc/rectify">
+      <remap from="camera_info" to="/kinect_head/rgb/camera_info" />
+      <remap from="image_mono" to="image_raw" />
+      <remap from="image_rect" to="image_rect_color" />
+    </node>
+  </group>
+  <group ns="/kinect_head_c2/depth_registered">
+    <node name="republish_depth"
+          pkg="image_transport" type="republish"
+          args="compressedDepth raw">
+      <remap from="in" to="hw_registered/image_rect_raw" />
+      <remap from="out" to="/kinect_head_localhost/depth_registered/hw_registered/image_rect_raw" />
+    </node>
+  </group>
+  <group ns="kinect_head_localhost">
+    <node name="pointcloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone depth_image_proc/point_cloud_xyzrgb">
+      <remap from="rgb/camera_info" to="/kinect_head/rgb/camera_info" />
+      <remap from="depth_registered/image_rect" to="depth_registered/hw_registered/image_rect_raw" />
+    </node>
+  </group>
+
+<!-- }} kinect -->
+
+<!-- laser {{ -->
+
+  <node name="laser_scan_assembler"
+        pkg="laser_assembler" type="laser_scan_assembler">
+    <remap from="scan" to="/tilt_scan" />
+    <rosparam>
+      fixed_frame: base_link
+      tf_cache_time_secs: 10.0
+      max_scans: 400
+      ignore_laser_skew: true
+    </rosparam>
+  </node>
+
+  <node name="assemble_scans2_client"
+        pkg="laser_scan_3d" type="assemble_scans2.py">
+    <remap from="scan" to="tilt_scan" />
+  </node>
+
+<!-- }} laser -->
+
+<!--
+  <node name="laser_scan_to_point_cloud2"
+        pkg="laser_scan_3d" type="laser_scan_to_point_cloud2.py">
+    <remap from="scan" to="/tilt_scan" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="tilt_laser_listener"
+        name="tilt_laser_listener"
+        output="screen">
+    <remap from="~input" to="/joint_states" />
+    <rosparam>
+      laser_type: tilt
+      joint_name: laser_tilt_mount_joint
+      use_laser_assembler: false 
+    </rosparam>
+    <remap from="~assemble_scans2" to="assemble_scans2" />
+  </node>
+-->
+
+</launch>
