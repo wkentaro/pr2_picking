@@ -1,0 +1,34 @@
+<launch>
+
+  <include file="$(find laser_scan_3d)/launch/my_view_pr2.launch" />
+
+  <include file="$(find pr2_picking)/launch/hsi_color_filter.launch" >
+    <!-- <arg name="DEFAULT_NAMESPACE" value="/camera/depth_registered" /> -->
+    <arg name="DEFAULT_NAMESPACE" value="/kinect_head/depth_registered" />
+    <arg name="INPUT" value="points" />
+    <arg name="FILTER_NAME_SUFFIX" value="blue" />
+    <arg name="h_max" value="-75" />
+    <arg name="h_min" value="-115" />
+    <arg name="s_min" value="110" />
+  </include>
+
+  <include file="$(find pr2_picking)/launch/hsi_color_filter.launch" >
+    <!-- <arg name="DEFAULT_NAMESPACE" value="/camera/depth_registered" /> -->
+    <arg name="DEFAULT_NAMESPACE" value="/kinect_head/depth_registered" />
+    <arg name="INPUT" value="points" />
+    <arg name="FILTER_NAME_SUFFIX" value="red" />
+    <arg name="h_max" value="10" />
+    <arg name="h_min" value="-30" />
+    <arg name="s_min" value="100" />
+  </include>
+
+  <include file="$(find pr2_picking)/launch/hsi_color_filter.launch" >
+    <!-- <arg name="DEFAULT_NAMESPACE" value="/camera/depth_registered" /> -->
+    <arg name="DEFAULT_NAMESPACE" value="/kinect_head/depth_registered" />
+    <arg name="INPUT" value="points" />
+    <arg name="FILTER_NAME_SUFFIX" value="green" />
+    <arg name="h_max" value="-115" />
+    <arg name="h_min" value="-128" />
+    <arg name="s_min" value="80" />
+  </include>
+</launch>

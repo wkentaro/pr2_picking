@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find pr2_picking)/launch/my_pr2_object_segmentation_3d.launch" />
+  <include file="$(find laser_scan_3d)/launch/my_view_pr2.launch" />
+</launch>
